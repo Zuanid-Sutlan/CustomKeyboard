@@ -67,9 +67,20 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0")
     implementation("androidx.savedstate:savedstate:1.2.1")
 
+    // Lifecycle & ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
     // ... other dependencies
 //        implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.8.0" // Or the latest stable version
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")// Or the latest stable version
 
+    // Emoji2 dependencies
+    implementation("androidx.emoji2:emoji2:1.6.0")
+    implementation("androidx.emoji2:emoji2-views:1.6.0")
+    implementation("androidx.emoji2:emoji2-emojipicker:1.6.0")
+    implementation("androidx.emoji2:emoji2-views-helper:1.6.0")
+
+//    implementation("com.vanniktech:emoji-google:0.18.0")
 
 }

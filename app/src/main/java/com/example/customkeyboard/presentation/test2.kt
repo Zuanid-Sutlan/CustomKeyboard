@@ -802,6 +802,7 @@ package com.example.customkeyboard.presentation
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -821,6 +822,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -831,6 +833,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.example.customkeyboard.R
+import com.example.customkeyboard.presentation.emoji.EmojiPickerComposable
 
 enum class KeyboardMode {
     LOWERCASE, UPPERCASE, NUMBERS, SYMBOLS
@@ -913,195 +917,221 @@ fun ModernKeyboard(
         KeyboardMode.NUMBERS -> numberKeys
         KeyboardMode.SYMBOLS -> symbolKeys
     }
+    var showEmojiPicker by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color(0xFF2B2B2B))
-            .padding(horizontal = 4.dp, vertical = 8.dp)
-    ) {
-        // First row - QWERTY
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            currentKeys[0].forEach { key ->
-                KeyButton(
-                    text = key,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onKeyPress(key)
-                        if (keyboardMode == KeyboardMode.UPPERCASE && !capsLockEnabled) {
-                            keyboardMode = KeyboardMode.LOWERCASE
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+    if (showEmojiPicker) {
+        Column() {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                IconButton(
+                    onClick = { showEmojiPicker = false}
+                ) { Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null) }
             }
+            EmojiPickerComposable(
+                onEmojiSelected = { emoji ->
+//                        val currentText = textFieldValue.text
+//                        val cursorPosition = textFieldValue.selection.start
+//                        val newText = currentText.substring(0, cursorPosition) +
+//                                emoji +
+//                                currentText.substring(cursorPosition)
+//                        textFieldValue = TextFieldValue(
+//                            text = newText,
+//                            selection = TextRange(cursorPosition + emoji.length)
+//                        )
+                    onKeyPress(emoji)
+                },
+                modifier = Modifier.height(280.dp)
+            )
         }
-
-        // Second row - ASDF with padding
-        Row(
-            modifier = Modifier
+    } else{
+        Column(
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                .background(Color(0xFF2B2B2B))
+                .padding(horizontal = 4.dp, vertical = 8.dp)
         ) {
-            Spacer(modifier = Modifier.width(16.dp))
-
-            currentKeys[1].forEach { key ->
-                KeyButton(
-                    text = key,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onKeyPress(key)
-                        if (keyboardMode == KeyboardMode.UPPERCASE && !capsLockEnabled) {
-                            keyboardMode = KeyboardMode.LOWERCASE
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+            // First row - QWERTY
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 3.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                currentKeys[0].forEach { key ->
+                    KeyButton(
+                        text = key,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onKeyPress(key)
+                            if (keyboardMode == KeyboardMode.UPPERCASE && !capsLockEnabled) {
+                                keyboardMode = KeyboardMode.LOWERCASE
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-        }
+            // Second row - ASDF with padding
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 3.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Spacer(modifier = Modifier.width(16.dp))
 
-        // Third row - ZXCV with Shift and Delete
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Shift key
-            if (keyboardMode == KeyboardMode.LOWERCASE || keyboardMode == KeyboardMode.UPPERCASE) {
-                ShiftKey(
-                    isUppercase = keyboardMode == KeyboardMode.UPPERCASE,
-                    capsLockEnabled = capsLockEnabled,
+                currentKeys[1].forEach { key ->
+                    KeyButton(
+                        text = key,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onKeyPress(key)
+                            if (keyboardMode == KeyboardMode.UPPERCASE && !capsLockEnabled) {
+                                keyboardMode = KeyboardMode.LOWERCASE
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+
+            // Third row - ZXCV with Shift and Delete
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 3.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Shift key
+                if (keyboardMode == KeyboardMode.LOWERCASE || keyboardMode == KeyboardMode.UPPERCASE) {
+                    ShiftKey(
+                        isUppercase = keyboardMode == KeyboardMode.UPPERCASE,
+                        capsLockEnabled = capsLockEnabled,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            keyboardMode = if (keyboardMode == KeyboardMode.LOWERCASE) {
+                                KeyboardMode.UPPERCASE
+                            } else {
+                                KeyboardMode.LOWERCASE
+                            }
+                        },
+                        onLongClick = {
+                            capsLockEnabled = !capsLockEnabled
+                            keyboardMode =
+                                if (capsLockEnabled) KeyboardMode.UPPERCASE else KeyboardMode.LOWERCASE
+                        },
+                        modifier = Modifier.weight(1.3f)
+                    )
+                } else {
+                    SymbolShiftKey(
+                        isSymbols = keyboardMode == KeyboardMode.SYMBOLS,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            keyboardMode = if (keyboardMode == KeyboardMode.SYMBOLS) {
+                                KeyboardMode.NUMBERS
+                            } else {
+                                KeyboardMode.SYMBOLS
+                            }
+                        },
+                        modifier = Modifier.weight(1.3f)
+                    )
+                }
+
+                currentKeys[2].forEach { key ->
+                    KeyButton(
+                        text = key,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onKeyPress(key)
+                            if (keyboardMode == KeyboardMode.UPPERCASE && !capsLockEnabled) {
+                                keyboardMode = KeyboardMode.LOWERCASE
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // Delete key
+                DeleteKey(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        keyboardMode = if (keyboardMode == KeyboardMode.LOWERCASE) {
-                            KeyboardMode.UPPERCASE
-                        } else {
-                            KeyboardMode.LOWERCASE
-                        }
-                    },
-                    onLongClick = {
-                        capsLockEnabled = !capsLockEnabled
-                        keyboardMode =
-                            if (capsLockEnabled) KeyboardMode.UPPERCASE else KeyboardMode.LOWERCASE
+                        onDelete()
                     },
                     modifier = Modifier.weight(1.3f)
                 )
-            } else {
-                SymbolShiftKey(
-                    isSymbols = keyboardMode == KeyboardMode.SYMBOLS,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        keyboardMode = if (keyboardMode == KeyboardMode.SYMBOLS) {
-                            KeyboardMode.NUMBERS
-                        } else {
-                            KeyboardMode.SYMBOLS
-                        }
-                    },
-                    modifier = Modifier.weight(1.3f)
-                )
             }
 
-            currentKeys[2].forEach { key ->
-                KeyButton(
-                    text = key,
+            // Bottom row - Mode switchers and space
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 3.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Numbers/ABC toggle
+                ModeKey(
+                    text = if (keyboardMode == KeyboardMode.NUMBERS || keyboardMode == KeyboardMode.SYMBOLS) "ABC" else "?123",
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onKeyPress(key)
-                        if (keyboardMode == KeyboardMode.UPPERCASE && !capsLockEnabled) {
-                            keyboardMode = KeyboardMode.LOWERCASE
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        keyboardMode = when (keyboardMode) {
+                            KeyboardMode.NUMBERS, KeyboardMode.SYMBOLS -> KeyboardMode.LOWERCASE
+                            else -> KeyboardMode.NUMBERS
                         }
+                    },
+                    modifier = Modifier.weight(1.5f)
+                )
+
+                // Emoji button
+                EmojiKey(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        // Handle emoji keyboard
+                        showEmojiPicker = true
                     },
                     modifier = Modifier.weight(1f)
                 )
+
+                // Globe/Language button
+                GlobeKey(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        // Handle language switch
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Space bar
+                SpaceKey(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onSpace()
+                    },
+                    modifier = Modifier.weight(4f)
+                )
+
+                // Period
+                KeyButton(
+                    text = ".",
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onKeyPress(".")
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Enter key
+                EnterKey(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onEnter()
+                    },
+                    modifier = Modifier.weight(1.5f)
+                )
             }
-
-            // Delete key
-            DeleteKey(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onDelete()
-                },
-                modifier = Modifier.weight(1.3f)
-            )
-        }
-
-        // Bottom row - Mode switchers and space
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Numbers/ABC toggle
-            ModeKey(
-                text = if (keyboardMode == KeyboardMode.NUMBERS || keyboardMode == KeyboardMode.SYMBOLS) "ABC" else "?123",
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    keyboardMode = when (keyboardMode) {
-                        KeyboardMode.NUMBERS, KeyboardMode.SYMBOLS -> KeyboardMode.LOWERCASE
-                        else -> KeyboardMode.NUMBERS
-                    }
-                },
-                modifier = Modifier.weight(1.5f)
-            )
-
-            // Emoji button
-            EmojiKey(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    // Handle emoji keyboard
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            // Globe/Language button
-            GlobeKey(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    // Handle language switch
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            // Space bar
-            SpaceKey(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onSpace()
-                },
-                modifier = Modifier.weight(4f)
-            )
-
-            // Period
-            KeyButton(
-                text = ".",
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onKeyPress(".")
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            // Enter key
-            EnterKey(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onEnter()
-                },
-                modifier = Modifier.weight(1.5f)
-            )
-        }
 
 //        BottomRow(
 //            onCloseKeyboard = {
@@ -1113,6 +1143,7 @@ fun ModernKeyboard(
 //                onSwitchKeyboard()
 //            }
 //        )
+        }
     }
 }
 
@@ -1144,14 +1175,29 @@ fun KeyButton(
                     onTap = { onClick() }
                 )
             },
-        contentAlignment = Alignment.Center
+//        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Normal
-        )
+        if (text == "a" || text == "A"){
+            Image(
+                modifier = Modifier.padding(top = 4.dp, end = 0.dp).size(24.dp).align(Alignment.TopEnd),
+                painter = painterResource(R.drawable.a),
+                contentDescription = "a"
+            )
+            Text(
+                modifier = Modifier.padding(4.dp).align(Alignment.BottomStart),
+                text = text,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }else {
+            Text(
+                text = text,
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
     }
 }
 

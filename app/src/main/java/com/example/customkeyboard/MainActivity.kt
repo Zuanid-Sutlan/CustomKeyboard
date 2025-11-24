@@ -9,6 +9,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -40,6 +42,11 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.customkeyboard.presentation.emoji.EmojiKeyboardScreen
+import com.example.customkeyboard.presentation.emoji.search.EmojiViewModel
+import com.example.customkeyboard.presentation.emoji.search.YourKeyboardLayout
+import com.example.customkeyboard.presentation.emoji.search.utils.EmojiPreferences
 import com.example.customkeyboard.ui.theme.CustomKeyboardTheme
 
 class MainActivity : ComponentActivity() {
@@ -47,9 +54,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+val context = LocalContext.current
+            val vm = EmojiViewModel(EmojiPreferences(context))
+
             CustomKeyboardTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    KeyboardSettingsScreen(modifier = Modifier.fillMaxSize().padding(innerPadding))
+                    KeyboardSettingsScreen(modifier = Modifier.fillMaxSize().padding(innerPadding), vm = vm)
+//                    EmojiKeyboardScreen(modifier = Modifier.fillMaxSize().padding(innerPadding))
                 }
             }
         }
@@ -57,7 +68,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun KeyboardSettingsScreen(modifier: Modifier = Modifier) {
+fun KeyboardSettingsScreen(modifier: Modifier = Modifier, vm: EmojiViewModel) {
     val context = LocalContext.current
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     val keyboardId =
@@ -110,7 +121,7 @@ fun KeyboardSettingsScreen(modifier: Modifier = Modifier) {
                 testField = it
             }
         )
-        Image(painter = painterResource(R.drawable.a), contentDescription = null)
+        Image(modifier = Modifier.size(24.dp), painter = painterResource(R.drawable.a), contentDescription = null)
         Spacer(modifier = Modifier.height(56.dp))
 
         Text(
@@ -156,5 +167,12 @@ fun KeyboardSettingsScreen(modifier: Modifier = Modifier) {
         if (isSelected) {
             Text("✅ Active", color = MaterialTheme.colorScheme.primary)
         }
+
+        YourKeyboardLayout(
+            emojiViewModel = vm,
+            onEmojiSelected = {},
+            onTextInput = {}
+        )
+
     }
 }
